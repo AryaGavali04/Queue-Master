@@ -1,150 +1,4 @@
-// import React, { useState } from "react";
-// import { useNavigate, useParams } from "react-router-dom";
-// import "../styles/ServiceModern.scss";
-// import BookAppointmentModal from "./BookAppointmentModal";
 
-// const DoctorList = () => {
-//   const navigate = useNavigate();
-//   const { hospitalId } = useParams();
-//   const [selectedDoctor, setSelectedDoctor] = useState(null);
-//   const [search, setSearch] = useState("");
-
-//   const doctors = [
-//     {
-//       id: 1,
-//       name: "Dr. Ananya Sharma",
-//       specialization: "Cardiologist",
-//       experience: "12 Years",
-//       timing: "10:00 AM – 2:00 PM",
-//       rating: 4.8,
-//       status: "Available",
-//     },
-//     {
-//       id: 2,
-//       name: "Dr. Rahul Verma",
-//       specialization: "Orthopedic Surgeon",
-//       experience: "9 Years",
-//       timing: "1:00 PM – 6:00 PM",
-//       rating: 4.6,
-//       status: "Busy",
-//     },
-//     {
-//       id: 3,
-//       name: "Dr. Meera Iyer",
-//       specialization: "Dermatologist",
-//       experience: "7 Years",
-//       timing: "11:00 AM – 4:00 PM",
-//       rating: 4.7,
-//       status: "Available",
-//     },
-//     {
-//       id: 4,
-//       name: "Dr. Suresh Patil",
-//       specialization: "General Physician",
-//       experience: "15 Years",
-//       timing: "9:00 AM – 1:00 PM",
-//       rating: 4.9,
-//       status: "Available",
-//     },
-//   ];
-
-//   // Filter doctors by name or specialization
-//   const filteredDoctors = doctors.filter(
-//     (d) =>
-//       d.name.toLowerCase().includes(search.toLowerCase()) ||
-//       d.specialization.toLowerCase().includes(search.toLowerCase())
-//   );
-
-//   return (
-//     <div className="service-page">
-//       {/* NAVBAR */}
-//       <div className="service-navbar">
-//         <button className="back-btn" onClick={() => navigate(-1)}>
-//           ← Back
-//         </button>
-
-//         <div className="nav-brand">
-//           <div className="logo">🏥</div>
-//           <div>
-//             <h2>Doctor Board</h2>
-//             <p>{decodeURIComponent(hospitalId)}</p>
-//           </div>
-//         </div>
-
-//         {/* Search Bar */}
-//         <div className="navbar-search">
-//           <input
-//             type="text"
-//             placeholder="Search doctor or specialization..."
-//             value={search}
-//             onChange={(e) => setSearch(e.target.value)}
-//           />
-//         </div>
-//       </div>
-
-//       {/* DOCTOR BOARD */}
-//       <div className="service-table">
-//         {filteredDoctors.map((d) => (
-//           <div key={d.id} className="service-row doctor-board">
-//             {/* LEFT SECTION */}
-//             <div className="doctor-left">
-//               <div className="doctor-avatar">{d.name.charAt(0)}</div>
-
-//               <div className="doctor-info-vertical">
-//                 <div className="doctor-name">{d.name}</div>
-//                 <div className="doctor-line">
-//                   <span className="label">Specialization:</span>
-//                   <span>{d.specialization}</span>
-//                 </div>
-//                 <div className="doctor-line">
-//                   <span className="label">Experience:</span>
-//                   <span>{d.experience}</span>
-//                 </div>
-//                 <div className="doctor-line">
-//                   <span className="label">OPD Timing:</span>
-//                   <span>{d.timing}</span>
-//                 </div>
-//                 <div className="doctor-line">
-//                   <span className="label">Rating:</span>
-//                   <span>⭐ {d.rating} / 5</span>
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* RIGHT SECTION */}
-//             <div className="doctor-right">
-//               <span className={`status ${d.status.toLowerCase()}`}>
-//                 {d.status}
-//               </span>
-
-//               <button
-//                 className="token-btn"
-//                 disabled={d.status !== "Available"}
-//                 onClick={() => setSelectedDoctor(d)}
-//               >
-//                 Get Token
-//               </button>
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-
-//       {/* BOOK APPOINTMENT MODAL */}
-//       {selectedDoctor && (
-//         <BookAppointmentModal
-//           doctor={selectedDoctor}
-//           onClose={() => setSelectedDoctor(null)}
-//           onConfirm={() => {
-//             alert(`Token booked successfully with ${selectedDoctor.name}`);
-//             setSelectedDoctor(null);
-//           }}
-//         />
-//       )}
-//     </div>
-//   );
-// };
-
-// export default DoctorList;
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/ServiceModern.scss";
@@ -152,29 +6,29 @@ import BookAppointmentModal from "./BookAppointmentModal";
 
 const DoctorList = () => {
   const navigate = useNavigate();
-  const { hospitalId } = useParams(); // branchId
+  const { hospitalId } = useParams();
   const [doctors, setDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // ✅ FETCH DOCTORS (Correct API)
+  // 🔹 Fetch Doctors
   useEffect(() => {
-    fetch(`http://localhost:8080/api/doctors/${hospitalId}`)
-      .then((res) => {
+    const fetchDoctors = async () => {
+      try {
+        const res = await fetch(`http://localhost:8080/api/doctors/${hospitalId}`);
         if (!res.ok) {
           throw new Error("Failed to fetch doctors");
         }
-        return res.json();
-      })
-      .then((data) => {
+        const data = await res.json();
         setDoctors(data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching doctors:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+    fetchDoctors();
   }, [hospitalId]);
 
   // 🔍 Search filter
@@ -184,34 +38,37 @@ const DoctorList = () => {
       d.specialization?.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ✅ BOOK TOKEN
-  const bookToken = (doctor) => {
+  // 🔹 Token Booking (fixed payload + error handling)
+  const bookToken = async (doctor) => {
     const tokenData = {
-      doctor: { id: doctor.id },
-      status: "BOOKED",
+      userId: 2,                          // ← TODO: Replace with real logged-in user ID
+      doctorId: doctor.id,
+      branchServiceId: 1                  // ← CHANGE TO A REAL EXISTING ID FROM branch_services TABLE (e.g., run SELECT id FROM branch_services LIMIT 1;)
     };
 
-    fetch("http://localhost:8080/api/tokens/book", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(tokenData),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Token booking failed");
-        }
-        return res.json();
-      })
-      .then((data) => {
-        alert(`Token #${data.id} booked successfully with ${doctor.name}`);
-        setSelectedDoctor(null);
-      })
-      .catch((err) => {
-        console.error("Booking failed:", err);
-        alert("Token booking failed!");
+    console.log("Sending booking payload:", tokenData);  // ← Debug log
+
+    try {
+      const res = await fetch("http://localhost:8080/api/tokens/book", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(tokenData)
       });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+      }
+
+      const data = await res.json();
+      alert(`Token #${data.tokenNumber} booked successfully with Dr. ${doctor.name}! Estimated wait: ${data.estimatedWaitTime} min`);
+      setSelectedDoctor(null);
+    } catch (err) {
+      console.error("Booking failed:", err);
+      alert(`Token booking failed: ${err.message}`);
+    }
   };
 
   return (
@@ -221,7 +78,6 @@ const DoctorList = () => {
         <button className="back-btn" onClick={() => navigate(-1)}>
           ← Back
         </button>
-
         <div className="nav-brand">
           <div className="logo">🏥</div>
           <div>
@@ -229,7 +85,6 @@ const DoctorList = () => {
             <p>Hospital ID: {hospitalId}</p>
           </div>
         </div>
-
         {/* SEARCH */}
         <div className="navbar-search">
           <input
@@ -255,38 +110,31 @@ const DoctorList = () => {
                 <div className="doctor-avatar">
                   {d.name?.charAt(0)}
                 </div>
-
                 <div className="doctor-info-vertical">
                   <div className="doctor-name">{d.name}</div>
-
                   <div className="doctor-line">
                     <span className="label">Specialization:</span>
                     <span>{d.specialization}</span>
                   </div>
-
                   <div className="doctor-line">
                     <span className="label">Experience:</span>
                     <span>{d.experience}</span>
                   </div>
-
                   <div className="doctor-line">
                     <span className="label">OPD Timing:</span>
                     <span>{d.timing}</span>
                   </div>
-
                   <div className="doctor-line">
                     <span className="label">Rating:</span>
                     <span>⭐ {d.rating} / 5</span>
                   </div>
                 </div>
               </div>
-
               {/* RIGHT SIDE */}
               <div className="doctor-right">
                 <span className={`status ${d.status?.toLowerCase()}`}>
                   {d.status}
                 </span>
-
                 <button
                   className="token-btn"
                   disabled={d.status !== "Available"}

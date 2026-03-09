@@ -1,24 +1,177 @@
 
 
-import React from "react";
+// import React from "react";
+// import { useNavigate } from "react-router-dom";
+// import "../styles/QueueStatus.scss";
+// import { FiClock, FiUsers, FiCheckCircle, FiArrowLeft } from "react-icons/fi";
+
+// const QueueStatus = () => {
+//   const navigate = useNavigate();
+
+//   const currentToken = "A21";
+//   const nowServing = "A18";
+//   const peopleAhead = 3;
+//   const estimatedWait = "12 mins";
+
+//   const queueList = ["A18", "A19", "A20", "A21", "A22", "A23"];
+
+//   return (
+//     <div className="queue-status-page">
+
+//       {/* ===== TOP NAVBAR ===== */}
+//       <div className="qs-navbar">
+//         <button className="back-btn" onClick={() => navigate(-1)}>
+//           <FiArrowLeft /> Back
+//         </button>
+
+//         <h2>Queue Status</h2>
+
+//         <div className="live-indicator">
+//           <span className="dot"></span> Live
+//         </div>
+//       </div>
+
+//       <h1 className="page-title">Live Queue Status</h1>
+
+//       {/* ===== STATUS CARDS ===== */}
+//       <div className="status-grid">
+//         <div className="status-card highlight">
+//           <h3>Your Token</h3>
+//           <div className="big-token">{currentToken}</div>
+//           <span className="badge waiting">Waiting</span>
+//         </div>
+
+//         <div className="status-card">
+//           <FiCheckCircle className="card-icon green" />
+//           <div>
+//             <h4>Now Serving</h4>
+//             <p className="value">{nowServing}</p>
+//           </div>
+//         </div>
+
+//         <div className="status-card">
+//           <FiUsers className="card-icon blue" />
+//           <div>
+//             <h4>People Ahead</h4>
+//             <p className="value">{peopleAhead}</p>
+//           </div>
+//         </div>
+
+//         <div className="status-card">
+//           <FiClock className="card-icon orange" />
+//           <div>
+//             <h4>Estimated Wait</h4>
+//             <p className="value">{estimatedWait}</p>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* ===== PROGRESS SECTION ===== */}
+//       <div className="progress-section">
+//         <div className="progress-header">
+//           <h3>Queue Progress</h3>
+//           <span>75% Completed</span>
+//         </div>
+
+//         <div className="progress-bar">
+//           <div className="progress-fill" style={{ width: "75%" }}></div>
+//         </div>
+
+//         <p className="progress-text">
+//           Almost your turn. Please stay nearby and watch the display.
+//         </p>
+//       </div>
+
+//       {/* ===== LIVE QUEUE LIST ===== */}
+//       <div className="queue-list-section">
+//         <div className="list-header">
+//           <h3>Live Queue Line</h3>
+//           <span className="updated">Updated just now</span>
+//         </div>
+
+//         <div className="queue-list">
+//           {queueList.map((token, index) => (
+//             <div
+//               key={index}
+//               className={`queue-item ${
+//                 token === currentToken ? "active" : ""
+//               }`}
+//             >
+//               {token}
+//             </div>
+//           ))}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default QueueStatus;
+
+
+
+
+
+
+
+
+
+
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/QueueStatus.scss";
 import { FiClock, FiUsers, FiCheckCircle, FiArrowLeft } from "react-icons/fi";
+import axios from "axios";
 
 const QueueStatus = () => {
+
   const navigate = useNavigate();
 
-  const currentToken = "A21";
-  const nowServing = "A18";
-  const peopleAhead = 3;
-  const estimatedWait = "12 mins";
+  const [queueList, setQueueList] = useState([]);
+  const [currentToken, setCurrentToken] = useState(null);
+  const [nowServing, setNowServing] = useState(null);
+  const [peopleAhead, setPeopleAhead] = useState(0);
+  const [estimatedWait, setEstimatedWait] = useState("");
 
-  const queueList = ["A18", "A19", "A20", "A21", "A22", "A23"];
+  const doctorId = 1; // selected doctor
+
+  useEffect(() => {
+    loadQueue();
+  }, []);
+
+  const loadQueue = async () => {
+    try {
+
+      const res = await axios.get(`http://localhost:8080/api/queue/${doctorId}`);
+
+      const tokens = res.data.map(t => "A" + t.tokenNumber);
+
+      setQueueList(tokens);
+
+      if (tokens.length > 0) {
+
+        setNowServing(tokens[0]);
+
+        const myToken = tokens[tokens.length - 1];
+
+        setCurrentToken(myToken);
+
+        const index = tokens.indexOf(myToken);
+
+        setPeopleAhead(index);
+
+        setEstimatedWait(index * 4 + " mins");
+
+      }
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="queue-status-page">
 
-      {/* ===== TOP NAVBAR ===== */}
       <div className="qs-navbar">
         <button className="back-btn" onClick={() => navigate(-1)}>
           <FiArrowLeft /> Back
@@ -33,8 +186,8 @@ const QueueStatus = () => {
 
       <h1 className="page-title">Live Queue Status</h1>
 
-      {/* ===== STATUS CARDS ===== */}
       <div className="status-grid">
+
         <div className="status-card highlight">
           <h3>Your Token</h3>
           <div className="big-token">{currentToken}</div>
@@ -64,44 +217,33 @@ const QueueStatus = () => {
             <p className="value">{estimatedWait}</p>
           </div>
         </div>
+
       </div>
 
-      {/* ===== PROGRESS SECTION ===== */}
-      <div className="progress-section">
-        <div className="progress-header">
-          <h3>Queue Progress</h3>
-          <span>75% Completed</span>
-        </div>
-
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: "75%" }}></div>
-        </div>
-
-        <p className="progress-text">
-          Almost your turn. Please stay nearby and watch the display.
-        </p>
-      </div>
-
-      {/* ===== LIVE QUEUE LIST ===== */}
       <div className="queue-list-section">
+
         <div className="list-header">
           <h3>Live Queue Line</h3>
           <span className="updated">Updated just now</span>
         </div>
 
         <div className="queue-list">
+
           {queueList.map((token, index) => (
+
             <div
               key={index}
-              className={`queue-item ${
-                token === currentToken ? "active" : ""
-              }`}
+              className={`queue-item ${token === currentToken ? "active" : ""}`}
             >
               {token}
             </div>
+
           ))}
+
         </div>
+
       </div>
+
     </div>
   );
 };
