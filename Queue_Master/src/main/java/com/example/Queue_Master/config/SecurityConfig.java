@@ -42,7 +42,9 @@ public class SecurityConfig {
                                 "/api/branches/**",
                                 "/api/doctors/**",
                                 "/api/branch-services/**",
-                                "/api/users/**"         // ← ADDED
+                                "/api/users/**",         // ← ADDED
+                                "/actuator/health",
+                                "/actuator/info"
                         ).permitAll()
 
                         // ── Queue status — public ─────────────────────────────
