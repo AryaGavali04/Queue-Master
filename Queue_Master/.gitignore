@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+Queue_Master/src/main/resources/application.properties
