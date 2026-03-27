@@ -1,0 +1,31 @@
+# Render service configuration for Queue_Master Spring Boot app
+# https://render.com/docs/render-yaml
+
+services:
+  - type: web_service
+    name: queue-master
+    env: docker
+    plan: free # or starter/standard as desired
+    region: oregon # change if you want another region
+    branch: main
+    # If your repo root is a monorepo, set root: Queue_Master
+    root: Queue_Master
+    # Dockerfile in Queue_Master/Dockerfile will be used automatically
+    # If you want to override, set dockerfilePath: Queue_Master/Dockerfile
+
+    # Optional: specify a custom start command (not required when using Dockerfile)
+    # startCommand: "java -jar /app/app.jar"
+
+    # Recommended: set your database/config secrets in Render's Dashboard (Env Vars)
+    # envVars:
+    #   - key: SPRING_DATASOURCE_URL
+    #     value: "jdbc:mysql://..."
+    #   - key: SPRING_DATASOURCE_USERNAME
+    #     value: "..."
+    #   - key: SPRING_DATASOURCE_PASSWORD
+    #     value: "..."
+    #   - key: JWT_SECRET
+    #     value: "..."
+    
+    # Optional: health check path
+    # healthCheckPath: /actuator/health

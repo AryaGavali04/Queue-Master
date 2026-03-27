@@ -3,9 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import "../styles/ServiceModern.scss";
 
-const BankServices = () => {
-  const navigate     = useNavigate();
-  const { branchId } = useParams();
+const HotelServices = () => {
+  const navigate    = useNavigate();
+  const { hotelId } = useParams();
 
   const [services,        setServices]        = useState([]);
   const [selectedService, setSelectedService] = useState(null);
@@ -31,44 +31,60 @@ const BankServices = () => {
     Authorization : `Bearer ${token}`
   };
 
+  // ── Fetch hotel services ───────────────────────────────
   useEffect(() => {
-    if (!branchId) return;
+    if (!hotelId) return;
     setLoading(true);
     axios
-      .get(`http://localhost:8080/api/branch-services/${branchId}`)
-      .then((res) => { setServices(Array.isArray(res.data) ? res.data : []); setLoading(false); })
-      .catch(() => { setServices([]); setLoading(false); });
-  }, [branchId]);
+      .get(`http://localhost:8080/api/branch-services/${hotelId}`)
+      .then((res) => {
+        setServices(Array.isArray(res.data) ? res.data : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching services:", err);
+        setServices([]);
+        setLoading(false);
+      });
+  }, [hotelId]);
 
-  const filteredServices = services.filter((s) =>
-    s.name?.toLowerCase().includes(search.toLowerCase()) ||
-    s.description?.toLowerCase().includes(search.toLowerCase()) ||
-    s.counter?.toLowerCase().includes(search.toLowerCase())
+  const filteredServices = services.filter(
+    (s) =>
+      s.name?.toLowerCase().includes(search.toLowerCase())        ||
+      s.description?.toLowerCase().includes(search.toLowerCase()) ||
+      s.counter?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // ── Open modal ─────────────────────────────────────────
   const handleGetToken = (service) => {
     if (!userId) { navigate("/login"); return; }
     setSelectedService(service);
     setBookingResult(null);
     setErrorMessage("");
     setFormData({
-      fullName: "", email: "", phoneNumber: "",
-      date: new Date().toISOString().split("T")[0],
-      time: "", message: "",
+      fullName    : "",
+      email       : "",
+      phoneNumber : "",
+      date        : new Date().toISOString().split("T")[0],
+      time        : "",
+      message     : "",
     });
   };
 
+  // ── Close modal ────────────────────────────────────────
   const closeModal = () => {
     setSelectedService(null);
     setBookingResult(null);
     setErrorMessage("");
   };
 
+  // ── Handle input change ────────────────────────────────
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ── Book token ─────────────────────────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userId) { setErrorMessage("Please log in to book a token."); return; }
@@ -78,8 +94,10 @@ const BankServices = () => {
       branchServiceId : selectedService.id,
       doctorId        : null,
       userId          : parseInt(userId),
-      bookingDate     : formData.date
+      bookingDate     : formData.date   // "yyyy-MM-dd" ✅
     };
+
+    console.log("Booking payload:", payload);
 
     setBookingLoading(true);
     setErrorMessage("");
@@ -91,8 +109,10 @@ const BankServices = () => {
         payload,
         { headers: authHeaders }
       );
+      console.log("Booking success:", res.data);
       setBookingResult(res.data);
     } catch (err) {
+      console.error("Booking error:", err);
       setErrorMessage(
         err.response?.data?.message ||
         err.response?.data?.error   ||
@@ -104,6 +124,7 @@ const BankServices = () => {
     }
   };
 
+  // ── Cancel token ───────────────────────────────────────
   const handleCancelToken = async () => {
     if (!bookingResult?.tokenId) return;
     try {
@@ -120,14 +141,14 @@ const BankServices = () => {
   return (
     <div className="service-page">
 
-      {/* NAVBAR */}
+      {/* ── NAVBAR ─────────────────────────────────────── */}
       <div className="service-navbar">
         <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
         <div className="nav-brand">
-          <div className="logo">🏦</div>
+          <div className="logo">🏨</div>
           <div>
-            <h2>Bank Service Board</h2>
-            <p>Branch ID: {branchId}</p>
+            <h2>Hotel Service Board</h2>
+            <p>Hotel ID: {hotelId}</p>
           </div>
         </div>
         <div className="navbar-search">
@@ -140,7 +161,7 @@ const BankServices = () => {
         </div>
       </div>
 
-      {/* SERVICE LIST */}
+      {/* ── SERVICE LIST ───────────────────────────────── */}
       <div className="service-table">
         {loading ? (
           <h3 style={{ padding: "20px" }}>Loading services...</h3>
@@ -153,14 +174,28 @@ const BankServices = () => {
                 <div className="doctor-avatar">{s.name?.charAt(0)}</div>
                 <div className="doctor-info-vertical">
                   <div className="doctor-name">{s.name}</div>
-                  <div className="doctor-line"><span className="label">Service:</span><span>{s.description}</span></div>
-                  <div className="doctor-line"><span className="label">Counter:</span><span>{s.counter}</span></div>
-                  <div className="doctor-line"><span className="label">Timing:</span><span>{s.timing}</span></div>
-                  <div className="doctor-line"><span className="label">Avg Time:</span><span>{s.avgServiceTimeMinutes ?? "—"} mins</span></div>
+                  <div className="doctor-line">
+                    <span className="label">Service:</span>
+                    <span>{s.description}</span>
+                  </div>
+                  <div className="doctor-line">
+                    <span className="label">Counter:</span>
+                    <span>{s.counter}</span>
+                  </div>
+                  <div className="doctor-line">
+                    <span className="label">Timing:</span>
+                    <span>{s.timing}</span>
+                  </div>
+                  <div className="doctor-line">
+                    <span className="label">Avg Time:</span>
+                    <span>{s.avgServiceTimeMinutes ?? "—"} mins</span>
+                  </div>
                 </div>
               </div>
               <div className="doctor-right">
-                <span className={`status ${s.status?.toLowerCase()}`}>{s.status}</span>
+                <span className={`status ${s.status?.toLowerCase()}`}>
+                  {s.status}
+                </span>
                 <button
                   className="token-btn"
                   disabled={s.status !== "Available"}
@@ -174,12 +209,12 @@ const BankServices = () => {
         )}
       </div>
 
-      {/* BOOKING MODAL */}
+      {/* ── BOOKING MODAL ──────────────────────────────── */}
       {selectedService && (
         <div className="modal-overlay">
           <div className="modal-card compact">
 
-            {/* SUCCESS CARD */}
+            {/* ── SUCCESS CARD ─────────────────────────── */}
             {bookingResult ? (
               <div className="success-card">
                 <div className="success-top">
@@ -192,16 +227,45 @@ const BankServices = () => {
                   <span className="stv">{bookingResult.displayToken}</span>
                 </div>
                 <div className="success-details">
-                  <div className="sd-row"><span>Name</span><strong>{formData.fullName}</strong></div>
-                  <div className="sd-row"><span>Email</span><strong>{formData.email}</strong></div>
-                  <div className="sd-row"><span>Phone</span><strong>{formData.phoneNumber}</strong></div>
-                  <div className="sd-row"><span>Service</span><strong>{bookingResult.branchServiceName || selectedService.name}</strong></div>
-                  <div className="sd-row"><span>Branch</span><strong>{bookingResult.branchName}</strong></div>
-                  <div className="sd-row"><span>Date</span><strong>{bookingResult.bookingDate}</strong></div>
-                  <div className="sd-row"><span>Time</span><strong>{formData.time}</strong></div>
-                  <div className="sd-row"><span>Queue Position</span><strong>#{bookingResult.queuePosition}</strong></div>
+                  <div className="sd-row">
+                    <span>Name</span>
+                    <strong>{formData.fullName}</strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Email</span>
+                    <strong>{formData.email}</strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Phone</span>
+                    <strong>{formData.phoneNumber}</strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Service</span>
+                    <strong>
+                      {bookingResult.branchServiceName || selectedService.name}
+                    </strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Hotel</span>
+                    <strong>{bookingResult.branchName}</strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Date</span>
+                    <strong>{bookingResult.bookingDate}</strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Time</span>
+                    <strong>{formData.time}</strong>
+                  </div>
+                  <div className="sd-row">
+                    <span>Queue Position</span>
+                    <strong>#{bookingResult.queuePosition}</strong>
+                  </div>
                   {formData.message && (
-                    <div className="sd-row"><span>Message</span><strong>{formData.message}</strong></div>
+                    <div className="sd-row">
+                      <span>Message</span>
+                      <strong>{formData.message}</strong>
+                    </div>
                   )}
                 </div>
                 {bookingResult.estimatedWaitTimeMinutes > 0 && (
@@ -212,21 +276,23 @@ const BankServices = () => {
                 )}
                 <div className="success-actions">
                   <button className="btn-done" onClick={closeModal}>Done</button>
-                  <button className="btn-cancel-token" onClick={handleCancelToken}>Cancel Token</button>
+                  <button className="btn-cancel-token" onClick={handleCancelToken}>
+                    Cancel Token
+                  </button>
                 </div>
               </div>
 
             ) : (
 
-              /* BOOKING FORM */
+              /* ── BOOKING FORM ─────────────────────── */
               <>
                 {/* MODAL HEADER */}
                 <div className="modal-header">
                   <div className="mh-left">
-                    <div className="mh-icon">🏦</div>
+                    <div className="mh-icon">🏨</div>
                     <div>
-                      <h3>Book a Service Token</h3>
-                      <p>{selectedService.name} — Branch {branchId}</p>
+                      <h3>Book Hotel Service Token</h3>
+                      <p>{selectedService.name} — Hotel {hotelId}</p>
                     </div>
                   </div>
                   <button className="close-btn" onClick={closeModal}>✕</button>
@@ -246,7 +312,9 @@ const BankServices = () => {
                   <div className="mss-divider" />
                   <div className="mss-item">
                     <span>Avg. Time</span>
-                    <strong>{selectedService.avgServiceTimeMinutes ?? "—"} mins</strong>
+                    <strong>
+                      {selectedService.avgServiceTimeMinutes ?? "—"} mins
+                    </strong>
                   </div>
                 </div>
 
@@ -258,9 +326,8 @@ const BankServices = () => {
                     </div>
                   )}
 
-                  {/* SECTION LABEL */}
-                  <div className="form-section-label">Personal Information</div>
-
+                  {/* SECTION — Personal */}
+                  <div className="form-section-label">Guest Information</div>
                   <div className="form-grid">
                     <div className="form-group">
                       <label>Full Name <span className="req">*</span></label>
@@ -299,11 +366,10 @@ const BankServices = () => {
                     </div>
                   </div>
 
-                  {/* SECTION LABEL */}
+                  {/* SECTION — Booking */}
                   <div className="form-section-label" style={{ marginTop: "16px" }}>
-                    Appointment Details
+                    Booking Details
                   </div>
-
                   <div className="form-grid">
                     <div className="form-group">
                       <label>Date <span className="req">*</span></label>
@@ -330,14 +396,14 @@ const BankServices = () => {
 
                   <div className="form-group" style={{ marginTop: "4px" }}>
                     <label>
-                      Message
+                      Special Requests
                       <span className="opt"> — Optional</span>
                     </label>
                     <textarea
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Any additional information or special requests..."
+                      placeholder="Any special requests or requirements..."
                       rows={2}
                     />
                   </div>
@@ -376,4 +442,4 @@ const BankServices = () => {
   );
 };
 
-export default BankServices;
+export default HotelServices;

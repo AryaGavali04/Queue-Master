@@ -1,5 +1,3 @@
-
-
 package com.example.Queue_Master.repository;
 
 import com.example.Queue_Master.entity.Token;
@@ -141,4 +139,7 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
             "LEFT JOIN FETCH t.branchService " +
             "WHERE t.id = :tokenId")
     Optional<Token> findByIdWithDetails(@Param("tokenId") Long tokenId);
+
+    // ✅ NEW — needed for delete branch
+    List<Token> findByBranch_Id(Long branchId);
 }

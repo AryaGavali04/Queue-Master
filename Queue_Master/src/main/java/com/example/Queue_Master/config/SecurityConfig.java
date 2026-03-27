@@ -42,9 +42,7 @@ public class SecurityConfig {
                                 "/api/branches/**",
                                 "/api/doctors/**",
                                 "/api/branch-services/**",
-                                "/api/users/**",         // ← ADDED
-                                "/actuator/health",
-                                "/actuator/info"
+                                "/api/users/**"
                         ).permitAll()
 
                         // ── Queue status — public ─────────────────────────────
@@ -53,24 +51,31 @@ public class SecurityConfig {
                                 "/api/v1/tokens/branch-service/*/queue-status"
                         ).permitAll()
 
-                        // ── Token booking — USER only ─────────────────────────
+                        // ── Super Admin only ──────────────────────────────────
+                        .requestMatchers(
+                                "/api/super-admin/**"
+                        ).hasRole("SUPER_ADMIN")
+
+                        // ── Admin — ADMIN + SUPER_ADMIN ───────────────────────
+                        .requestMatchers(
+                                "/api/admin/**",
+                                "/api/create-staff"
+                        ).hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // ── Staff actions — STAFF + ADMIN + SUPER_ADMIN ───────
+                        .requestMatchers(
+                                "/api/v1/tokens/doctor/*/call-next",
+                                "/api/v1/tokens/branch-service/*/call-next"
+                        ).hasAnyRole("STAFF", "ADMIN", "SUPER_ADMIN")
+
+                        // ── Token booking — USER + ADMIN + SUPER_ADMIN ────────
                         .requestMatchers(
                                 "/api/v1/tokens/book",
                                 "/api/v1/tokens/*/cancel",
                                 "/api/v1/tokens/user/**"
-                        ).hasRole("USER")
+                        ).hasAnyRole("USER", "ADMIN", "SUPER_ADMIN")
 
-                        // ── Staff actions — STAFF only ────────────────────────
-                        .requestMatchers(
-                                "/api/v1/tokens/doctor/*/call-next",
-                                "/api/v1/tokens/branch-service/*/call-next"
-                        ).hasRole("STAFF")
-
-                        // ── Admin actions — ADMIN only ────────────────────────
-                        .requestMatchers(
-                                "/api/create-staff"
-                        ).hasRole("ADMIN")
-
+                        // ── Everything else — must be authenticated ───────────
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter,

@@ -9,7 +9,7 @@ public class QueueMasterApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(QueueMasterApplication.class, args);
-		System.out.println("Heyy Abhi...!Our project is Running...!");
+		System.out.println("Heyy Abhi...!Your project is Running...!");
 	}
 
 }

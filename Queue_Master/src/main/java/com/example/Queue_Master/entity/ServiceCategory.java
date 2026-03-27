@@ -25,7 +25,7 @@ public class ServiceCategory {
 
     private String description;
 
-//    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonIgnore
-////    private List<Branch> branches = new ArrayList<>();
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Branch> branches = new ArrayList<>();
 }

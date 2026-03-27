@@ -19,7 +19,6 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    // Generate token from username
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
@@ -29,23 +28,19 @@ public class JwtUtil {
                 .compact();
     }
 
-    // Extract username from token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Validate token
     public boolean isTokenValid(String token, String username) {
         String extractedUsername = extractUsername(token);
         return extractedUsername.equals(username) && !isTokenExpired(token);
     }
 
-    // Check if token is expired
     private boolean isTokenExpired(String token) {
         return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 
-    // Extract any claim
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
@@ -55,6 +50,7 @@ public class JwtUtil {
         return resolver.apply(claims);
     }
 
+    // ✅ FIXED — Base64 decode now matches the Base64 secret
     private Key getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);

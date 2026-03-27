@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 @CrossOrigin(origins = "*")
@@ -34,7 +36,9 @@ public class AuthController {
             AuthResponse response = userService.login(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            // ✅ Return JSON instead of plain text
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", e.getMessage()));
         }
     }
 

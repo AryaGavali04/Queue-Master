@@ -19,9 +19,13 @@
 	<name>Queue_Master</name>
 	<description>Queue Master Backend</description>
 
-	<properties>
-		<java.version>17</java.version>
-	</properties>
+<!--	<properties>-->
+<!--		<java.version>17</java.version>-->
+<!--	</properties>-->
+
+    <properties>
+        <java.version>22</java.version>
+    </properties>
 
 	<dependencies>
 
@@ -49,12 +53,7 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
-		<!-- Spring Boot Actuator (for health checks) -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
-
+		<!-- JWT - API -->
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
 			<artifactId>jjwt-api</artifactId>
